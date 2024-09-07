@@ -2,6 +2,13 @@
 
 The task is to implement a simple client-server application using Python. The server listens for incoming connection from a client. Client attempts to connect to the server and establish a file transmission. The server receives transmitted file and saves it to a designated directory.
 
+### Instructions
+1. Create a virtual environment `python3 -m venv env`
+2. Run the environment `source env/bin/activate`
+3. Install the dependencies `pip install -r requirements.txt`
+4. Run the server `python3 server.py` then the client `python3 client.py` retrospectively
+5. Follow the instructions on screen
+
 
 ### Project Structure
 - `README.md`: An overview and instructions.
