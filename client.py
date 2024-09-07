@@ -72,9 +72,7 @@ def send_file(s: socket.socket, file_path: str) -> None:
     file_hash = compute_file_hash(file_path)
     total_sent = 0
 
-    s.send(file_path.encode() + b"\n")
-    s.send(str(file_size).encode() + b"\n")
-    s.send(file_hash.encode() + b"\n")
+    s.send(f"{file_path}|{file_size}|{file_hash}".encode("utf-8"))
 
     with open(file_path, "rb") as file:
         with tqdm(

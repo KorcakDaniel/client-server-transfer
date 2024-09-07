@@ -60,13 +60,13 @@ def verify_hash(file_path: str, hash: str) -> bool:
 
 def receive_file(client_socket: socket.socket) -> None:
     """Receive a file from the client"""
-    client_file_path = client_socket.recv(CHUNK_BYTES).decode()
-    client_file_size = client_socket.recv(CHUNK_BYTES).decode()
-    client_file_hash = client_socket.recv(CHUNK_BYTES).decode()
+    details = client_socket.recv(CHUNK_BYTES).decode().split("|")
+
+    client_file_path = details[0]
+    client_file_size = details[1]
+    client_file_hash = details[2]
 
     server_file_path = alter_file_path(client_file_path)
-    # print(client_file_path + "\n" + client_file_size + "\n" + client_file_hash)
-    print(type(int(client_file_size)))
 
     # TODO: Metadata comparison, send response back to the client
     if (
