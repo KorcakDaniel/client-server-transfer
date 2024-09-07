@@ -55,7 +55,9 @@ def compute_file_hash(file_path: str, hash_algo="sha256") -> str:
 
 def verify_hash(file_path: str, hash: str) -> bool:
     """Compares the original hash with the hash of a file"""
-    return compute_file_hash(file_path) == hash
+    computed_hash = compute_file_hash(file_path)
+    logger.debug(f"Desired hash: {hash}\nComputed hash: {computed_hash}")
+    return computed_hash == hash
 
 
 def receive_file(client_socket: socket.socket) -> None:
@@ -63,7 +65,7 @@ def receive_file(client_socket: socket.socket) -> None:
     details = client_socket.recv(CHUNK_BYTES).decode().split("|")
 
     client_file_path = details[0]
-    client_file_size = details[1]
+    client_file_size = int(details[1])
     client_file_hash = details[2]
 
     server_file_path = alter_file_path(client_file_path)
@@ -77,29 +79,30 @@ def receive_file(client_socket: socket.socket) -> None:
         logger.warning("Identical file already exists")
         return None
 
-        with open(file_save_path + file_name, "wb") as file:
-            with tqdm(
-                total=client_file_size,
-                unit="B",
-                unit_scale=True,
-                desc="Receiving file...",
-            ) as progress:
-                total_sent = 0
-                while chunks <= client_file_size:
-                    data = client.recv(CHUNK_BYTES)
-                    if not (data):
-                        break
-                    file.write(data)
-                    total_sent += len(data)
-                    progress.update(len(data))
+    with open(server_file_path, "wb") as file:
+        with tqdm(
+            total=client_file_size,
+            unit="B",
+            unit_scale=True,
+            desc="Receiving file...",
+        ) as progress:
+            total_sent = 0
+            while total_sent <= client_file_size:
+                data = client_socket.recv(CHUNK_BYTES)
+                if not (data):
+                    break
+                file.write(data)
+                total_sent += len(data)
+                progress.update(len(data))
 
-        if total_sent == file_size:
+        if total_sent == client_file_size:
             logger.info("File transferred successfully!")
         else:
             logger.error("Something went wrong with the file transfer")
 
 
 def main():
+    create_directory()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((IP_ADDRESS, PORT))
     logger.info("Waiting for a connection...")
